@@ -1,65 +1,125 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { sourcesAction } from 'redux/actions/sourcesAction';
 
-export default function Home() {
+import PropTypes from 'prop-types';
+import getCountryName from 'utility';
+
+import styled from '@emotion/styled';
+
+const MainContainer = styled.div`
+  display: flex;
+  position: relative;
+  max-width: 1200px;
+  width: 100%;
+`;
+
+const ArticleContainer = styled.div`
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
+  justify-items: center;
+  grid-gap: 15px;
+
+  @media (min-width: ${(props) => props.theme.breakPoints.desktop}) {
+    min-width: calc(75% - 300px);
+    width: 100%;
+  }
+`;
+
+const BookmarkListContainer = styled.div`
+  display: none;
+
+  @media (min-width: ${(props) => props.theme.breakPoints.desktop}) {
+    display: flex;
+    position: relative;
+    width: 25%;
+    max-height: 100%;
+    min-width: 300px;
+    margin-left: 10px;
+    height: 100%;
+    border-left: 1px solid rgba(38, 34, 34, 0.15);
+  }
+`;
+
+const ListContianer = styled.div`
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+const Home = ({
+  countriesData,
+  updateCountryList,
+  updateLanguageList,
+  updateCategoryList,
+  updateSourceList
+}) => {
+  const getfilteredList = (filter, data) => {
+    const dataSet = [];
+
+    data?.forEach((category) => {
+      dataSet.push(category?.[filter]);
+    });
+
+    return [...new Set(dataSet)];
+  };
+
+  const setCountryList = (data) => {
+    const countryObj = [];
+
+    getfilteredList('country', data)?.forEach((country) =>
+      countryObj.push(getCountryName(country?.toString().toUpperCase()))
+    );
+
+    updateCountryList(countryObj.filter((el) => el !== null));
+  };
+
+  useEffect(() => {
+    setCountryList(countriesData);
+    updateLanguageList(getfilteredList('language', countriesData));
+    updateCategoryList(getfilteredList('category', countriesData));
+    updateSourceList(countriesData);
+  }, [countriesData]);
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <MainContainer>
+      <ArticleContainer />
+      <BookmarkListContainer>
+        <ListContianer />
+      </BookmarkListContainer>
+    </MainContainer>
+  );
+};
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+Home.getInitialProps = async () => {
+  const headlines = await fetch(
+    'https://newsapi.org/v2/top-headlines?country=us&apiKey=3a4277082eb247ebbd868f4afb2f2f0b'
+  );
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+  const res = await fetch(
+    'https://newsapi.org/v2/sources?apiKey=3a4277082eb247ebbd868f4afb2f2f0b'
+  );
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+  const sourcesData = await res.json();
+  const headlinesData = await headlines.json();
+  return { countriesData: sourcesData.sources, headlines: headlinesData };
+};
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+const mapDispatchToProps = () => ({
+  updateCountryList: (status) => sourcesAction?.setCountryList(status),
+  updateLanguageList: (status) => sourcesAction?.setLanguageList(status),
+  updateCategoryList: (status) => sourcesAction?.setCategoryList(status),
+  updateSourceList: (status) => sourcesAction?.setSourceList(status)
+});
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+Home.propTypes = {
+  countriesData: PropTypes.array.isRequired,
+  updateCountryList: PropTypes.func.isRequired,
+  updateLanguageList: PropTypes.func.isRequired,
+  updateCategoryList: PropTypes.func.isRequired,
+  updateSourceList: PropTypes.func.isRequired
+};
 
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
-}
+export default connect(mapDispatchToProps)(Home);

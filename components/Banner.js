@@ -16,11 +16,14 @@ const BannerContainer = styled.div`
   position: fixed;
   width: 100%;
   z-index: 1;
+  top: 0;
+  left: 0;
   background: ${(props) => props.theme.colors.white};
+  border-bottom: 1px solid rgba(38, 34, 34, 0.15);
 
   @media (min-width: ${(props) => props.theme.breakPoints.desktop}) {
-    padding: 30px 0;
-    position: relative;
+    padding: 30px 0 0;
+    border-bottom: none;
   }
 `;
 
@@ -42,7 +45,7 @@ const HamburgerContainer = styled.div`
   height: 100%;
   top: 0;
   left: 0;
-  padding: 10px;
+  padding: 0 10px;
 
   @media (min-width: ${(props) => props.theme.breakPoints.desktop}) {
     display: none;
@@ -55,7 +58,7 @@ const BookMarkListContainer = styled.div`
   height: 100%;
   top: 0;
   right: 0;
-  padding: 10px;
+  padding: 0 10px;
 
   @media (min-width: ${(props) => props.theme.breakPoints.desktop}) {
     display: none;
