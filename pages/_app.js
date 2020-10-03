@@ -6,15 +6,16 @@ import PropTypes from 'prop-types';
 import theme from 'theme';
 import Head from 'next/head';
 
+import styled from '@emotion/styled';
 import Banner from '@components/Banner';
 import BookmarkSidebar from '@components/BookmarkSidebar';
-import styled from '@emotion/styled';
+import NavSidebar from '@components/NavSidebar';
 
 const ComponentWrapper = styled.div`
-  position: relative;
-  display: flex;
-  justify-content: center;
   padding-top: 80px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
 
   @media (min-width: ${(props) => props.theme.breakPoints.desktop}) {
     padding-top: 210px;
@@ -28,6 +29,7 @@ const MyApp = ({ Component, pageProps }) => (
         <link rel='stylesheet' href='https://use.typekit.net/xkz5olp.css' />
       </Head>
       <Banner />
+      <NavSidebar />
       <ComponentWrapper>
         <Component {...pageProps} />
       </ComponentWrapper>

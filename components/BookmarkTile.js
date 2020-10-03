@@ -7,6 +7,11 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   max-height: 200px;
+  width: 100%;
+
+  @media (min-width: ${(props) => props.theme.breakPoints.tablet}) {
+    width: auto;
+  }
 
   hr {
     height: 0;
@@ -28,6 +33,17 @@ const BookmarkTileContainer = styled.div`
   box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.2);
 `;
 
+const TitleSkeleton = styled.div`
+  flex-direction: column;
+  align-items: center;
+  margin-left: 20px;
+  margin-top: 5px;
+
+  @media (min-width: ${(props) => props.theme.breakPoints.tablet}) {
+    display: none;
+  }
+`;
+
 const ContentSkeleton = styled.div`
   display: flex;
   flex-direction: column;
@@ -45,6 +61,18 @@ const HeaderSkeleton = styled.div`
 const BookmarkTile = () => (
   <Container>
     <BookmarkTileContainer>
+      <TitleSkeleton>
+        <Skeleton
+          height={100}
+          width={150}
+          style={{
+            marginBottom: '20px',
+            borderRadius: '0px',
+            width: '100%',
+            height: '100%'
+          }}
+        />
+      </TitleSkeleton>
       <ContentSkeleton>
         <HeaderSkeleton>
           <Skeleton

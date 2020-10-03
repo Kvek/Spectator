@@ -1,47 +1,46 @@
 import React, { useEffect, useRef } from 'react';
-
-import PropTypes from 'prop-types';
-
 import { CloseIcon } from 'assets';
 import { connect } from 'react-redux';
 import { sidebarAction } from 'redux/actions/sidebarAction';
 
+import PropTypes from 'prop-types';
+
 import styled from '@emotion/styled';
 
-const BookmarkContainer = styled.div`
+const NavContainer = styled.div`
   position: fixed;
-  right: -100%;
+  left: -100%;
   top: 0;
   bottom: 0;
   width: 100%;
-  transition: right 0.25s ease-in;
+  transition: left 0.2s linear;
   background: #fff;
   border-left: 1px solid rgba(38, 34, 34, 0.15);
   z-index: 1;
 
   @media (min-width: ${(props) => props.theme.breakPoints.tablet}) {
     max-width: 370px;
-    right: -370px;
+    left: -370px;
   }
 
   &.showSidebar {
-    right: 0;
+    left: 0;
   }
 `;
 
-const BookMarkInnerContainer = styled.div`
+const NavInnerContainer = styled.div`
   position: relative;
   height: 100%;
   overflow: auto;
 `;
 
-const BookmarkTitle = styled.div`
+const NavTitle = styled.div`
   width: 100%;
   text-align: center;
   vertical-align: center;
 `;
 
-const BookmarkHeader = styled.div`
+const NavHeader = styled.div`
   display: flex;
   position: sticky;
   background: #fff;
@@ -75,7 +74,7 @@ const SidebarShadow = styled.div`
   z-index: 1;
 `;
 
-const BookmarkSidebar = ({ sidebarStatus, toggleBookmarkSidebar }) => {
+const NavSidebar = ({ sidebarStatus, toggleNavSidebar }) => {
   const body = useRef(null);
 
   useEffect(() => {
@@ -89,34 +88,30 @@ const BookmarkSidebar = ({ sidebarStatus, toggleBookmarkSidebar }) => {
   return (
     <>
       {sidebarStatus ? <SidebarShadow /> : null}
-      <BookmarkContainer className={sidebarStatus ? 'showSidebar' : null}>
-        <BookMarkInnerContainer>
-          <BookmarkHeader>
-            <BookmarkTitle>BookMarks</BookmarkTitle>
-            <CloseIcon
-              width='25px'
-              onClick={() => toggleBookmarkSidebar(false)}
-            />
-          </BookmarkHeader>
+      <NavContainer className={sidebarStatus ? 'showSidebar' : null}>
+        <NavInnerContainer>
+          <NavHeader>
+            <NavTitle>Navs</NavTitle>
+            <CloseIcon width='25px' onClick={() => toggleNavSidebar(false)} />
+          </NavHeader>
           <SideContainer />
-        </BookMarkInnerContainer>
-      </BookmarkContainer>
+        </NavInnerContainer>
+      </NavContainer>
     </>
   );
 };
 
 const mapStateToProps = (state) => ({
-  sidebarStatus: state?.sidebar?.showBookmarkSidebar
+  sidebarStatus: state?.sidebar?.showSidebar
 });
 
 const mapDispatchToProps = () => ({
-  toggleBookmarkSidebar: (status) =>
-    sidebarAction?.toggleBookmarkSidebar(status)
+  toggleNavSidebar: (status) => sidebarAction?.toggleSidebar(status)
 });
 
-BookmarkSidebar.propTypes = {
-  toggleBookmarkSidebar: PropTypes.func.isRequired,
+NavSidebar.propTypes = {
+  toggleNavSidebar: PropTypes.func.isRequired,
   sidebarStatus: PropTypes.bool.isRequired
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(BookmarkSidebar);
+export default connect(mapStateToProps, mapDispatchToProps)(NavSidebar);
