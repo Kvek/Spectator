@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { sourcesAction } from 'redux/actions/sourcesAction';
+import { getCountryName } from 'utility';
+import { headlineAction } from 'redux/actions/headlineAction';
 
 import PropTypes from 'prop-types';
-import getCountryName from 'utility';
 
 import styled from '@emotion/styled';
 import BookmarkTile from '@components/BookmarkTile';
@@ -44,6 +45,11 @@ const ArticleContainer = styled.div`
 
 const BookmarkListContainer = styled.div`
   display: none;
+  scrollbar-width: 0;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   @media (min-width: ${(props) => props.theme.breakPoints.desktop}) {
     display: flex;
@@ -60,18 +66,71 @@ const BookmarkListContainer = styled.div`
   }
 `;
 
-const ListContianer = styled.div`
+const ListContainer = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
 `;
 
+const BookmarkHeader = styled.div`
+  position: sticky;
+  top: 0;
+  color: ${(props) => props.theme.colors.app_default};
+  background: ${(props) => props.theme.colors.white};
+  padding-left: 15px;
+  z-index: 1;
+
+  hr {
+    margin: none;
+  }
+
+  .seperator {
+    border: none;
+    border-bottom: 1px solid rgba(211, 13, 29, 0.7);
+
+    &.main {
+      border-bottom: 2px solid ${(props) => props.theme.colors.app_default};
+    }
+
+    &.end {
+      border-color: rgba(211, 13, 29, 0.2);
+    }
+  }
+
+  h3 {
+    font-family: goudy-old-style;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.2;
+    letter-spacing: normal;
+    margin-bottom: 10px;
+    padding: 0 15px;
+  }
+
+  span {
+    color: rgba(38, 34, 34, 0.6);
+    font-family: SFProDisplay;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.43;
+    letter-spacing: normal;
+    margin-bottom: 30px;
+    display: block;
+    padding: 0 15px;
+  }
+`;
+
 const Home = ({
+  headlines,
   countriesData,
   updateCountryList,
   updateLanguageList,
   updateCategoryList,
-  updateSourceList
+  updateSourceList,
+  updateHeadline,
+  bookmarks
 }) => {
   const getfilteredList = (filter, data) => {
     const dataSet = [];
@@ -90,7 +149,7 @@ const Home = ({
       countryObj.push(getCountryName(country?.toString().toUpperCase()))
     );
 
-    updateCountryList(countryObj.filter((el) => el !== null));
+    updateCountryList(countryObj.filter((country) => country !== null));
   };
 
   useEffect(() => {
@@ -98,32 +157,42 @@ const Home = ({
     updateLanguageList(getfilteredList('language', countriesData));
     updateCategoryList(getfilteredList('category', countriesData));
     updateSourceList(countriesData);
+    updateHeadline(headlines);
   }, [countriesData]);
+
+  const isPreviouslyBookmarked = (currentBookmark) =>
+    bookmarks?.filter((bookmark) => bookmark?.title === currentBookmark?.title)
+      .length > 0;
+
+  if (!headlines) return null;
 
   return (
     <MainContainer>
       <ArticleContainer>
-        <Tile />
-        <Tile />
-        <Tile />
-        <Tile />
-        <Tile />
-        <Tile />
-        <Tile />
-        <Tile />
+        {headlines?.map((headline) => (
+          <Fragment key={headline?.title}>
+            <Tile
+              bookmark={headline}
+              isBookmarked={isPreviouslyBookmarked(headline)}
+            />
+          </Fragment>
+        ))}
       </ArticleContainer>
       <BookmarkListContainer>
-        <div>BookMark</div>
-        <ListContianer>
-          <BookmarkTile />
-          <BookmarkTile />
-          <BookmarkTile />
-          <BookmarkTile />
-          <BookmarkTile />
-          <BookmarkTile />
-          <BookmarkTile />
-          <BookmarkTile />
-        </ListContianer>
+        <BookmarkHeader>
+          <hr className='seperator main' />
+          <hr className='seperator' />
+          <hr className='seperator end' />
+          <h3>Your Bookmarks</h3>
+          <span>Articles you bookmark will be added to the list.</span>
+        </BookmarkHeader>
+        <ListContainer>
+          {bookmarks?.map((bookmark) => (
+            <Fragment key={bookmark?.title}>
+              <BookmarkTile bookmark={bookmark} />
+            </Fragment>
+          ))}
+        </ListContainer>
       </BookmarkListContainer>
     </MainContainer>
   );
@@ -140,22 +209,33 @@ Home.getInitialProps = async () => {
 
   const sourcesData = await res.json();
   const headlinesData = await headlines.json();
-  return { countriesData: sourcesData.sources, headlines: headlinesData };
+  return {
+    countriesData: sourcesData.sources,
+    headlines: headlinesData?.articles
+  };
 };
 
 const mapDispatchToProps = () => ({
-  updateCountryList: (status) => sourcesAction?.setCountryList(status),
-  updateLanguageList: (status) => sourcesAction?.setLanguageList(status),
-  updateCategoryList: (status) => sourcesAction?.setCategoryList(status),
-  updateSourceList: (status) => sourcesAction?.setSourceList(status)
+  updateCountryList: (data) => sourcesAction?.setCountryList(data),
+  updateLanguageList: (data) => sourcesAction?.setLanguageList(data),
+  updateCategoryList: (data) => sourcesAction?.setCategoryList(data),
+  updateSourceList: (data) => sourcesAction?.setSourceList(data),
+  updateHeadline: (data) => headlineAction?.updateHeadline(data)
+});
+
+const mapStateToProps = (state) => ({
+  bookmarks: state?.bookmark?.bookmarks
 });
 
 Home.propTypes = {
   countriesData: PropTypes.array.isRequired,
+  headlines: PropTypes.array.isRequired,
   updateCountryList: PropTypes.func.isRequired,
   updateLanguageList: PropTypes.func.isRequired,
   updateCategoryList: PropTypes.func.isRequired,
-  updateSourceList: PropTypes.func.isRequired
+  updateSourceList: PropTypes.func.isRequired,
+  updateHeadline: PropTypes.func.isRequired,
+  bookmarks: PropTypes.array.isRequired
 };
 
-export default connect(mapDispatchToProps)(Home);
+export default connect(mapStateToProps, mapDispatchToProps)(Home);

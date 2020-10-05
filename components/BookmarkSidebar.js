@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { sidebarAction } from 'redux/actions/sidebarAction';
 
 import styled from '@emotion/styled';
+import BookmarkTile from '@components/BookmarkTile';
 
 const BookmarkContainer = styled.div`
   position: fixed;
@@ -37,8 +38,20 @@ const BookMarkInnerContainer = styled.div`
 
 const BookmarkTitle = styled.div`
   width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   text-align: center;
-  vertical-align: center;
+  text-transform: uppercase;
+  font-family: goudy-old-style;
+  font-weight: normal;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.2;
+  letter-spacing: normal;
+  padding: 0 15px;
+  font-size: 25px;
+  color: ${(props) => props.theme.colors.app_default};
 `;
 
 const BookmarkHeader = styled.div`
@@ -75,7 +88,11 @@ const SidebarShadow = styled.div`
   z-index: 1;
 `;
 
-const BookmarkSidebar = ({ sidebarStatus, toggleBookmarkSidebar }) => {
+const BookmarkSidebar = ({
+  sidebarStatus,
+  toggleBookmarkSidebar,
+  bookmarks
+}) => {
   const body = useRef(null);
 
   useEffect(() => {
@@ -98,7 +115,11 @@ const BookmarkSidebar = ({ sidebarStatus, toggleBookmarkSidebar }) => {
               onClick={() => toggleBookmarkSidebar(false)}
             />
           </BookmarkHeader>
-          <SideContainer />
+          <SideContainer>
+            {bookmarks?.map((bookmark) => (
+              <BookmarkTile bookmark={bookmark} key={bookmark?.title} />
+            ))}
+          </SideContainer>
         </BookMarkInnerContainer>
       </BookmarkContainer>
     </>
@@ -106,7 +127,8 @@ const BookmarkSidebar = ({ sidebarStatus, toggleBookmarkSidebar }) => {
 };
 
 const mapStateToProps = (state) => ({
-  sidebarStatus: state?.sidebar?.showBookmarkSidebar
+  sidebarStatus: state?.sidebar?.showBookmarkSidebar,
+  bookmarks: state?.bookmark?.bookmarks
 });
 
 const mapDispatchToProps = () => ({
@@ -116,7 +138,12 @@ const mapDispatchToProps = () => ({
 
 BookmarkSidebar.propTypes = {
   toggleBookmarkSidebar: PropTypes.func.isRequired,
-  sidebarStatus: PropTypes.bool.isRequired
+  sidebarStatus: PropTypes.bool.isRequired,
+  bookmarks: PropTypes.array
+};
+
+BookmarkSidebar.defaultProps = {
+  bookmarks: []
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(BookmarkSidebar);

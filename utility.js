@@ -246,11 +246,51 @@ const isoCountries = {
   ZW: 'Zimbabwe'
 };
 
-const getCountryName = (countryCode) => {
+export const getCountryName = (countryCode) => {
   if (isoCountries.hasOwnProperty(countryCode)) {
     return { country: isoCountries[countryCode], code: countryCode };
   }
   return null;
 };
 
-export default getCountryName;
+// localStorage.js
+export const loadState = () => {
+  try {
+    const serializedState = localStorage.getItem('state');
+    if (serializedState === null) {
+      return undefined;
+    }
+    return JSON.parse(serializedState);
+  } catch (err) {
+    return undefined;
+  }
+};
+
+// localStorage.js
+export const saveState = (state) => {
+  try {
+    const serializedState = JSON.stringify(state);
+    localStorage.setItem('state', serializedState);
+  } catch {
+    // ignore write errors
+  }
+};
+
+export const deleteState = () => {
+  localStorage.clear();
+};
+
+export const getDate = (date) => {
+  let dd = date.getDate();
+  let mm = date.getMonth() + 1;
+  const yyyy = date.getFullYear();
+
+  if (dd < 10) {
+    dd = `0${dd}`;
+  }
+
+  if (mm < 10) {
+    mm = `0${mm}`;
+  }
+  return `${dd}/${mm}/${yyyy}`;
+};
